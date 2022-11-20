@@ -1,0 +1,2 @@
+score,ccp_alpha,class_weight,criterion,max_depth,max_features,max_leaf_nodes,min_impurity_decrease,min_impurity_split,min_samples_leaf,min_samples_split,min_weight_fraction_leaf,random_state,splitter
+0.7776918666684424,0.0,nan,gini,9,nan,nan,0.0,nan,1,5,0.0,42,best

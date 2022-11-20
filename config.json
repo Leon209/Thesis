@@ -1,0 +1,36 @@
+{
+    "gdt":  {
+             "depth": 5, 
+             "learning_rate_index": 0.05, 
+             "learning_rate_values": 0.01, 
+             "learning_rate_leaf": 0.005, 
+             "initializer_values": "GlorotUniform", 
+             "initializer_index": "GlorotUniform", 
+             "initializer_leaf": "GlorotUniform", 
+             "optimizer": "adam", 
+             "batch_size": 512, 
+             "epochs": 10000, 
+             "restarts": 10, 
+             "restart_type": "loss", 
+             "early_stopping_epochs": 200, 
+             "early_stopping_type": "loss", 
+             "early_stopping_epsilon": 0.0}, 
+ 
+    "preprocessing": {"balance_threshold": 0, 
+                      "normalization_technique": "mean"}, 
+
+    "computation": {"random_seed": 42, 
+                    "trials": 10, 
+                    "use_best_hpo_result": true, 
+                    "force_depth": false, 
+                    "use_gpu": true,
+                    "gpu_numbers": "0", 
+                    "n_jobs": 20, 
+                    "verbosity": 0, 
+                    "metrics_class": ["f1", "roc_auc", "accuracy"], 
+                    "eval_metric_class": "f1"}, 
+
+    "benchmarks": {"sklearn": true, 
+                   "GeneticTree": true}
+
+}
