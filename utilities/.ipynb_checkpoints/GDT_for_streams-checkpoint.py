@@ -329,11 +329,11 @@ class GDT(tf.Module):
         
     
     
-    def fit(self, 
+    def partial_fit(self, 
             X_train, 
             y_train, 
             
-            batch_size=512, 
+            batch_size=256, 
             epochs=1, 
             
             restarts = 0,
@@ -449,6 +449,7 @@ class GDT(tf.Module):
 
             batch_size = min(batch_size, int(np.ceil(X_train.shape[0]/2)))
             #shuffle data
+            #Hier Kann mein Code eingefügt werden
             for current_epoch in tqdm(range(epochs), desc='epochs', disable=disable):                
                 tf.random.set_seed(self.seed + current_epoch)
                 X_train_epoch = tf.random.shuffle(X_train, seed=self.seed + current_epoch)

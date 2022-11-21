@@ -334,7 +334,7 @@ class GDT(tf.Module):
             y_train, 
             
             batch_size=512, 
-            epochs=500, 
+            epochs=1, 
             
             restarts = 0,
             restart_type='loss',#'metric'
@@ -345,7 +345,8 @@ class GDT(tf.Module):
             
             valid_data=None,
             ):
-                
+         
+            #setup
         self.path_identifier_list = []
         self.internal_node_index_list = []
         for leaf_index in tf.unstack(tf.constant([i for i in range(self.leaf_node_num_)])):
@@ -357,7 +358,7 @@ class GDT(tf.Module):
         self.path_identifier_list = tf.reshape(tf.stack(self.path_identifier_list), (-1,self.depth))
         self.internal_node_index_list = tf.reshape(tf.cast(tf.stack(self.internal_node_index_list), tf.int64), (-1,self.depth))            
             
-        
+        #changing to tensors to increase efficiency
         X_train = tf.dtypes.cast(tf.convert_to_tensor(X_train), tf.float32)               
         y_train = tf.dtypes.cast(tf.convert_to_tensor(y_train), tf.float32)   
                 
@@ -372,6 +373,7 @@ class GDT(tf.Module):
             metric_name = 'r2'
             metric = tfa.metrics.r_square.RSquare()        
         
+        #valid data for stream learning none
         if valid_data is not None:
             valid_data = (tf.dtypes.cast(tf.convert_to_tensor(valid_data[0]), tf.float32), 
                           tf.dtypes.cast(tf.convert_to_tensor(valid_data[1]), tf.float32))
@@ -380,7 +382,8 @@ class GDT(tf.Module):
         self.data_std = tf.cast(tf.math.reduce_std(y_train), tf.float32)     
         self.data_min = tf.cast(tf.math.reduce_min(y_train), tf.float32)
         self.data_max = tf.cast(tf.math.reduce_max(y_train), tf.float32)        
-
+    
+        #Normalize validation and y_train
         if self.objective == 'classification':
             if self.number_of_classes > 2 and (len(y_train.shape) == 1 or y_train.shape[1] == 1):
                 if isinstance(y_train, pd.Series):
@@ -392,8 +395,7 @@ class GDT(tf.Module):
                     if isinstance(valid_data_labels, pd.Series):
                         valid_data_labels = valid_data_labels.values  
                     valid_data_labels = np_utils.to_categorical(tf.reshape(valid_data_labels, (-1,1)), num_classes=self.number_of_classes)
-                    valid_data = (valid_data[0], valid_data_labels)
-                    
+                    valid_data = (valid_data[0], valid_data_labels)              
         else:   
             y_train = self.normalize_labels(y_train)   
             
@@ -446,7 +448,8 @@ class GDT(tf.Module):
             epochs_without_improvement = 0    
 
             batch_size = min(batch_size, int(np.ceil(X_train.shape[0]/2)))
-
+            #shuffle data
+            #Hier Kann mein Code eingefügt werden
             for current_epoch in tqdm(range(epochs), desc='epochs', disable=disable):                
                 tf.random.set_seed(self.seed + current_epoch)
                 X_train_epoch = tf.random.shuffle(X_train, seed=self.seed + current_epoch)
