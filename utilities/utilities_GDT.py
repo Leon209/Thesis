@@ -1625,7 +1625,43 @@ def get_preprocessed_dataset(identifier,
                             ]
 
         X_data = data.drop(['a'], axis = 1)
-        y_data = pd.Series(OrdinalEncoder().fit_transform(data['a'].values.reshape(-1, 1)).flatten(), name='a')            
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['a'].values.reshape(-1, 1)).flatten(), name='a') 
+        
+    elif identifier == 'BIN:agr_a':
+        feature_names = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age', #numeric
+                        'elevel', #ka
+                        'car', #numeric
+                        'zipcode',
+                        'hvalue',
+                        'hyears',      
+                        'loan', #numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/agr_a.csv', names=feature_names, index_col=False, delimiter=',', header=0).head(50000)
+        print(data)
+        
+        features_select = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age', #numeric
+                        'car', #numeric   
+                        'loan', #numeric
+                        'class' #binary
+                        ]
+        
+        data = data[features_select]
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        
             
     elif identifier == 'BIN:German':
 
@@ -1651,7 +1687,8 @@ def get_preprocessed_dataset(identifier,
                         'Telephone', #binary
                         'foreign worker', #binary
                         'label'
-                        ]
+                        ]            
+ 
 
         data = pd.read_csv('./real_world_datasets/German/german.data', names=feature_names, index_col=False, delimiter=' ')#, header=0)#, header=0)
 
