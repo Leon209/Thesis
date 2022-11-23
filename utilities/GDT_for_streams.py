@@ -137,6 +137,8 @@ class GDT(tf.Module):
         
             normalize = None,
         
+            initialized = False, #Flag to only initialzed everything one time
+        
             random_seed = 42,
             verbosity = 1):   
          
@@ -346,7 +348,305 @@ class GDT(tf.Module):
             valid_data=None,
             ):
          
-            #setup
+        #Change to Partial fit method    
+        if self.initialized == False:
+            self.path_identifier_list = []
+            self.internal_node_index_list = []
+            for leaf_index in tf.unstack(tf.constant([i for i in range(self.leaf_node_num_)])):
+                for current_depth in tf.unstack(tf.constant([i for i in range(1, self.depth+1)])):
+                    path_identifier = tf.cast(tf.math.floormod(tf.math.floor(leaf_index/(tf.math.pow(2, (self.depth-current_depth)))), 2), tf.float32)
+                    internal_node_index =  tf.cast(tf.cast(tf.math.pow(2, (current_depth-1)), tf.float32) + tf.cast(tf.math.floor(leaf_index/(tf.math.pow(2, (self.depth-(current_depth-1))))), tf.float32) - 1.0, tf.int64)
+                    self.path_identifier_list.append(path_identifier)
+                    self.internal_node_index_list.append(internal_node_index)
+            self.path_identifier_list = tf.reshape(tf.stack(self.path_identifier_list), (-1,self.depth))
+            self.internal_node_index_list = tf.reshape(tf.cast(tf.stack(self.internal_node_index_list), tf.int64), (-1,self.depth)) 
+            
+            
+        #changing to tensors to increase efficiency
+        X_train = tf.dtypes.cast(tf.convert_to_tensor(X_train), tf.float32)               
+        y_train = tf.dtypes.cast(tf.convert_to_tensor(y_train), tf.float32)   
+                
+        if self.objective == 'classification':
+            if self.number_of_classes >= 2:
+                metric_name = 'f1'
+                metric = tfa.metrics.F1Score(average='weighted', num_classes=self.number_of_classes)#tf.keras.metrics.CategoricalAccuracy()
+            else:
+                metric_name = 'f1'
+                metric = tfa.metrics.F1Score(average='weighted', num_classes=self.number_of_classes)#tf.keras.metrics.BinaryAccuracy()
+        elif self.objective == 'regression':
+            metric_name = 'r2'
+            metric = tfa.metrics.r_square.RSquare()        
+        
+        #valid data for stream learning none
+        if valid_data is not None:
+            valid_data = (tf.dtypes.cast(tf.convert_to_tensor(valid_data[0]), tf.float32), 
+                          tf.dtypes.cast(tf.convert_to_tensor(valid_data[1]), tf.float32))
+        
+        self.data_mean = tf.cast(tf.math.reduce_mean(y_train), tf.float32)
+        self.data_std = tf.cast(tf.math.reduce_std(y_train), tf.float32)     
+        self.data_min = tf.cast(tf.math.reduce_min(y_train), tf.float32)
+        self.data_max = tf.cast(tf.math.reduce_max(y_train), tf.float32)        
+    
+        #Normalize validation and y_train
+        if self.objective == 'classification':
+            if self.number_of_classes > 2 and (len(y_train.shape) == 1 or y_train.shape[1] == 1):
+                if isinstance(y_train, pd.Series):
+                    y_train = y_train.values
+                y_train = np_utils.to_categorical(tf.reshape(y_train, (-1,1)), num_classes=self.number_of_classes) 
+
+                if valid_data is not None:
+                    valid_data_labels = valid_data[1]
+                    if isinstance(valid_data_labels, pd.Series):
+                        valid_data_labels = valid_data_labels.values  
+                    valid_data_labels = np_utils.to_categorical(tf.reshape(valid_data_labels, (-1,1)), num_classes=self.number_of_classes)
+                    valid_data = (valid_data[0], valid_data_labels)              
+        else:   
+            y_train = self.normalize_labels(y_train)   
+            
+            if valid_data is not None:
+                valid_data = (valid_data[0], self.normalize_labels(valid_data[1]))
+            
+        #Change to Partial fit method    
+        if self.initialized == False: 
+            split_values_best_model = None#tf.identity(self.split_values)
+            split_index_array_best_model = None#tf.identity(self.split_index_array)
+            leaf_classes_array_best_model = None#tf.identity(self.leaf_classes_array)                    
+
+            best_model_minimum_loss = np.inf
+            best_model_minimum_metric = -np.inf
+         #bis hier
+            
+        disable = True if self.verbosity == -1 else False
+            
+        for restart_number in tqdm(range(restarts+1), desc='restarts', disable=disable):
+            
+            backward_function = tf.function(self.backward, jit_compile=True)
+            self.seed += restart_number
+            
+            
+            #Change?
+            if restart_number > 0:
+
+                tf.keras.backend.clear_session()
+                
+                self.optimizer_index = tf.keras.optimizers.get(self.optimizer)
+                self.optimizer_values = tf.keras.optimizers.get(self.optimizer)
+                self.optimizer_leaf = tf.keras.optimizers.get(self.optimizer)
+
+                self.optimizer_index.learning_rate = self.learning_rate_index
+                self.optimizer_values.learning_rate = self.learning_rate_values
+                self.optimizer_leaf.learning_rate = self.learning_rate_leaf                     
+                
+                tf.random.set_seed(self.seed)
+                self.split_values.assign(tf.keras.initializers.get({'class_name': self.initializer_values, 'config': {'seed': self.seed}})(shape=(self.internal_node_num_, self.number_of_variables)))
+
+                self.split_index_array.assign(tf.keras.initializers.get({'class_name': self.initializer_index, 'config': {'seed': self.seed}})(shape=(self.internal_node_num_, self.number_of_variables)))
+
+                leaf_classes_array_shape = (self.leaf_node_num_,) if self.number_of_classes == 2 or self.objective == 'regression' else(self.leaf_node_num_, self.number_of_classes)
+
+                self.leaf_classes_array.assign(tf.keras.initializers.get({'class_name': self.initializer_leaf, 'config': {'seed': self.seed}})(shape=leaf_classes_array_shape))                  
+                
+            minimum_loss_epoch = np.inf
+            minimum_loss_epoch_valid = np.inf 
+
+            minimum_metric_epoch = -np.inf
+            minimum_metric_epoch_valid = -np.inf
+
+            epochs_without_improvement = 0    
+
+            batch_size = min(batch_size, int(np.ceil(X_train.shape[0]/2)))
+            #shuffle data
+            #Hier Kann mein Code eingefügt werden
+            for current_epoch in tqdm(range(epochs), desc='epochs', disable=disable):                
+                tf.random.set_seed(self.seed + current_epoch)
+                X_train_epoch = tf.random.shuffle(X_train, seed=self.seed + current_epoch)
+                tf.random.set_seed(self.seed + current_epoch)
+                y_train_epoch = tf.random.shuffle(y_train, seed=self.seed + current_epoch)      
+
+                loss_list = []   
+                preds_list = []
+
+
+                for index, (X_batch, y_batch) in enumerate(zip(make_batch_det(X_train_epoch, batch_size), make_batch_det(y_train_epoch, batch_size))):
+                    current_loss, preds_batch = backward_function(X_batch, y_batch)#self.backward(X_batch, y_batch)
+                    loss_list.append(float(current_loss))
+                    preds_list.append(preds_batch)
+                    if self.verbosity > 2:
+                        batch_idx = (index+1)*batch_size
+                        msg = "Epoch: {:02d} | Batch: {:03d} | Loss: {:.5f} |"
+                        print(msg.format(current_epoch, batch_idx, current_loss))                   
+
+                current_loss_epoch = np.mean(loss_list)
+                preds = tf.concat(preds_list, axis=0) 
+
+                loss_dict = {'loss': current_loss_epoch}
+
+                preds_metric = self.adjust_preds_for_metric(preds, logits=True)
+                if self.number_of_classes == 2:
+                    loss_dict[metric_name] = tf.reduce_mean(metric(np_utils.to_categorical(tf.reshape(y_train_epoch, (-1,1)), num_classes=self.number_of_classes), np_utils.to_categorical(tf.reshape(preds_metric, (-1,1)), num_classes=self.number_of_classes)))                 
+                else:
+                    loss_dict[metric_name] = tf.reduce_mean(metric(y_train_epoch, preds_metric))                 
+
+                if valid_data is not None:
+                    preds_val = self.predict(valid_data[0], return_probabilities=True, denormalize=False)#self.forward(valid_data[0], training=False)     
+
+                    current_loss_epoch_valid = tf.reduce_mean(self.loss(valid_data[1], preds_val))
+                    loss_dict['val_loss'] = current_loss_epoch_valid   
+                    preds_val_metric = self.adjust_preds_for_metric(preds_val)
+                    if self.number_of_classes == 2:
+                        loss_dict['val_' + metric_name] = tf.reduce_mean(metric(np_utils.to_categorical(tf.reshape(valid_data[1], (-1,1)), num_classes=self.number_of_classes), np_utils.to_categorical(tf.reshape(preds_val_metric, (-1,1)), num_classes=self.number_of_classes)))                 
+                    else:
+                        loss_dict['val_' + metric_name] = tf.reduce_mean(metric(valid_data[1], preds_val_metric))                    
+
+
+                if self.verbosity > 1:    
+                    msg = "Epoch: {:02d} | Loss: {:.5f} |"
+                    print(msg.format(current_epoch, current_loss_epoch))              
+                    if valid_data is not None:
+                        msg = "Epoch: {:02d} | Valid Loss: {:.5f} |"
+                        print(msg.format(current_epoch, current_loss_epoch_valid))                   
+
+                if self.verbosity == 1:  
+
+
+                    self.plotlosses.update(loss_dict)
+                    self.plotlosses.send()            
+
+                if early_stopping_type == 'metric' or restart_type == 'metric': 
+
+                    if valid_data is not None:
+                        if loss_dict['val_' + metric_name] - early_stopping_epsilon > minimum_metric_epoch_valid:
+                            minimum_metric_epoch_valid = loss_dict['val_' + metric_name]#current_loss_epoch_valid
+                            if early_stopping_type == 'metric':
+                                epochs_without_improvement = 0
+                                split_values_stored = tf.identity(self.split_values)
+                                split_index_array_stored = tf.identity(self.split_index_array)
+                                leaf_classes_array_stored = tf.identity(self.leaf_classes_array)          
+
+                        else:
+                            if early_stopping_type == 'metric':
+                                epochs_without_improvement += 1            
+                    else:
+                        if loss_dict[metric_name] - early_stopping_epsilon > minimum_metric_epoch:
+                            minimum_metric_epoch = loss_dict[metric_name]#current_loss_epoch
+
+                            if early_stopping_type == 'metric':
+                                epochs_without_improvement = 0
+                                split_values_stored = tf.identity(self.split_values)
+                                split_index_array_stored = tf.identity(self.split_index_array)
+                                leaf_classes_array_stored = tf.identity(self.leaf_classes_array)       
+
+                        else:
+                            if early_stopping_type == 'metric':
+                                epochs_without_improvement += 1
+
+                    if epochs_without_improvement >= early_stopping_epochs:  
+                        try:
+                            self.split_values.assign(split_values_stored)
+                            self.split_index_array.assign(split_index_array_stored)
+                            self.leaf_classes_array.assign(leaf_classes_array_stored)   
+                        except UnboundLocalError:
+                            pass
+
+                        break                   
+                if early_stopping_type == 'loss' or restart_type == 'loss': 
+                    if valid_data is not None:
+                        if current_loss_epoch_valid + early_stopping_epsilon < minimum_loss_epoch_valid:
+                            minimum_loss_epoch_valid = current_loss_epoch_valid
+
+                            if early_stopping_type == 'loss':
+                                epochs_without_improvement = 0
+                                split_values_stored = tf.identity(self.split_values)
+                                split_index_array_stored = tf.identity(self.split_index_array)
+                                leaf_classes_array_stored = tf.identity(self.leaf_classes_array)       
+
+                        else:
+                            if early_stopping_type == 'loss':
+                                epochs_without_improvement += 1            
+                    else:
+                        if current_loss_epoch + early_stopping_epsilon < minimum_loss_epoch:
+                            minimum_loss_epoch = current_loss_epoch
+
+                            if early_stopping_type == 'loss':
+                                epochs_without_improvement = 0
+                                split_values_stored = tf.identity(self.split_values)
+                                split_index_array_stored = tf.identity(self.split_index_array)
+                                leaf_classes_array_stored = tf.identity(self.leaf_classes_array)       
+
+                        else:
+                            if early_stopping_type == 'loss':
+                                epochs_without_improvement += 1
+
+                    if epochs_without_improvement >= early_stopping_epochs:  
+                        try:
+                            self.split_values.assign(split_values_stored)
+                            self.split_index_array.assign(split_index_array_stored)
+                            self.leaf_classes_array.assign(leaf_classes_array_stored)   
+                        except UnboundLocalError:
+                            pass
+                        break
+                        
+
+            if valid_data is not None:
+                if restart_type == 'metric':                
+                    if minimum_metric_epoch_valid > best_model_minimum_metric or restart_number == 0:# best_model_minimum_metric > best_model_minimum_metric:                     
+                        
+                        split_values_best_model = tf.identity(self.split_values)
+                        split_index_array_best_model = tf.identity(self.split_index_array)
+                        leaf_classes_array_best_model = tf.identity(self.leaf_classes_array)                    
+
+                        best_model_minimum_metric = minimum_metric_epoch_valid            
+
+                else:
+                    if minimum_loss_epoch_valid < best_model_minimum_loss or restart_number == 0:# best_model_minimum_metric > best_model_minimum_metric:             
+                        
+                        split_values_best_model = tf.identity(self.split_values)
+                        split_index_array_best_model = tf.identity(self.split_index_array)
+                        leaf_classes_array_best_model = tf.identity(self.leaf_classes_array)                    
+
+                        best_model_minimum_loss = minimum_loss_epoch_valid                           
+            else:
+                if restart_type == 'metric': 
+                    if minimum_metric_epoch > best_model_minimum_metric or restart_number == 0:# best_model_minimum_metric > best_model_minimum_metric:
+                        split_values_best_model = tf.identity(self.split_values)
+                        split_index_array_best_model = tf.identity(self.split_index_array)
+                        leaf_classes_array_best_model = tf.identity(self.leaf_classes_array)                    
+
+                        best_model_minimum_metric = minimum_metric_epoch              
+
+                else:
+                    if minimum_loss_epoch < best_model_minimum_loss or restart_number == 0:# best_model_minimum_metric > best_model_minimum_metric:
+                        split_values_best_model = tf.identity(self.split_values)
+                        split_index_array_best_model = tf.identity(self.split_index_array)
+                        leaf_classes_array_best_model = tf.identity(self.leaf_classes_array)                    
+
+                        best_model_minimum_loss = minimum_loss_epoch       
+        
+        try:
+            self.split_values.assign(split_values_best_model)
+            self.split_index_array.assign(split_index_array_best_model)
+            self.leaf_classes_array.assign(leaf_classes_array_best_model)   
+        except UnboundLocalError:
+            pass
+        
+    def fit(self, 
+            X_train, 
+            y_train, 
+            
+            batch_size=256, 
+            epochs=1, 
+            
+            restarts = 0,
+            restart_type='loss',#'metric'
+            
+            early_stopping_epochs=25, 
+            early_stopping_type='loss',#'metric'
+            early_stopping_epsilon = 0,
+            
+            valid_data=None,
+            ):
+         
+        #überflüssig
         self.path_identifier_list = []
         self.internal_node_index_list = []
         for leaf_index in tf.unstack(tf.constant([i for i in range(self.leaf_node_num_)])):
@@ -356,7 +656,7 @@ class GDT(tf.Module):
                 self.path_identifier_list.append(path_identifier)
                 self.internal_node_index_list.append(internal_node_index)
         self.path_identifier_list = tf.reshape(tf.stack(self.path_identifier_list), (-1,self.depth))
-        self.internal_node_index_list = tf.reshape(tf.cast(tf.stack(self.internal_node_index_list), tf.int64), (-1,self.depth))            
+        self.internal_node_index_list = tf.reshape(tf.cast(tf.stack(self.internal_node_index_list), tf.int64), (-1,self.depth))            #bis hier
             
         #changing to tensors to increase efficiency
         X_train = tf.dtypes.cast(tf.convert_to_tensor(X_train), tf.float32)               
@@ -622,7 +922,7 @@ class GDT(tf.Module):
         except UnboundLocalError:
             pass
         
-            
+                   
     
     
     
