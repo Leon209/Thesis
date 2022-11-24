@@ -137,11 +137,13 @@ class GDT(tf.Module):
         
             normalize = None,
         
-            initialized = False, #Flag to only initialzed everything one time
+            
         
             random_seed = 42,
             verbosity = 1):   
          
+        self.initialized = False #Flag to only initialzed everything one time
+        self.best_model_minimum_loss_previous_fit = np.inf
         
         self.depth = depth
         
@@ -414,7 +416,10 @@ class GDT(tf.Module):
 
             best_model_minimum_loss = np.inf
             best_model_minimum_metric = -np.inf
+            self.initialized = True
          #bis hier
+        if self.initialized == True:
+            best_model_minimum_loss = np.inf #self.best_model_minimum_loss_previous_fit
             
         disable = True if self.verbosity == -1 else False
             
