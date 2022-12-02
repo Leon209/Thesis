@@ -1641,7 +1641,7 @@ def get_preprocessed_dataset(identifier,
                         'class' #binary
                         ]
         
-        data = pd.read_csv('./datasets_streaming/agr_a.csv', names=feature_names, index_col=False, delimiter=',', header=0).head(50000)
+        data = pd.read_csv('./datasets_streaming/agr_a.csv', names=feature_names, index_col=False, delimiter=',', header=0)#.head(50000)
         print(data)
         
         features_select = [
