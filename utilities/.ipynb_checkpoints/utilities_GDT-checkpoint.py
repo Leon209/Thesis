@@ -322,6 +322,59 @@ def preprocess_data(X_data,
 
     return (X_train, y_train), (X_valid, y_valid), (X_test, y_test), normalizer_list
 
+
+
+
+def load_dataset_for_streams(identifier, 
+                             random_seed=42, 
+                             config=None,
+                             verbosity=0):
+    
+    if identifier == 'BIN:agr_a':
+        feature_names = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age', #numeric
+                        'elevel', #ka
+                        'car', #numeric
+                        'zipcode',
+                        'hvalue',
+                        'hyears',      
+                        'loan', #numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/agr_a.csv', names=feature_names, index_col=False, delimiter=',', header=0)#.head(50000)
+        print(data)
+        
+        features_select = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age', #numeric
+                        'car', #numeric   
+                        'loan', #numeric
+                        'class' #binary
+                        ]
+        
+        data = data[features_select]
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return X_data, y_data, nominal_features, ordinal_features
+        
+        
+        
+    
+    
+    
+    
+    
+    
+
 def get_preprocessed_dataset(identifier, 
                              random_seed=42, 
                              config=None,
@@ -5378,6 +5431,45 @@ def get_benchmark_dict(config, eval_identifier):
     
     return benchmark_dict
 
+def prepare_training_for_streams(identifier, config: dict):
+    
+    tf.random.set_seed(config['computation']['random_seed'])
+    np.random.seed(config['computation']['random_seed'])
+    random.seed(config['computation']['random_seed'])  
+    
+    config_test = deepcopy(config)
+    #config_test['gdt']['epochs'] = 100
+    if 'REG' not in identifier:
+        metrics = ['f1', 'roc_auc', 'accuracy']
+        sklearn_model = DecisionTreeClassifier
+        
+        if 'BIN' in identifier:
+            config_test['gdt']['objective'] = 'classification'
+            if 'loss' not in config_test['gdt']:
+                config_test['gdt']['loss'] = 'crossentropy'     
+            config_test['gdt']['normalize'] = None
+
+        elif 'MULT' in identifier:
+            config_test['gdt']['objective'] = 'classification'    
+            if 'loss' not in config_test['gdt']:
+                config_test['gdt']['loss'] = 'kl_divergence'
+            config_test['gdt']['normalize'] = None           
+        
+    else:
+        metrics = ['r2', 'neg_mean_absolute_percentage_error', 'neg_mean_absolute_error', 'neg_mean_squared_error']
+        sklearn_model = DecisionTreeRegressor    
+        
+        config_test['gdt']['objective'] = 'regression'
+        if 'loss' not in config_test['gdt']:
+            config_test['gdt']['loss'] = 'mse'         
+        if 'normalize' not in config_test['gdt']:
+            config_test['gdt']['normalize'] = 'mean'     
+            
+    return config_test, metrics
+
+    
+    
+    
 
 def prepare_training(identifier, config: dict):
     
