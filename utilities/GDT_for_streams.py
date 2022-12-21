@@ -258,7 +258,7 @@ class GDT(tf.Module):
         return function_values_gdt  
 
     @tf.function(jit_compile=True)
-    def predict(self, X, batch_size = 2048, return_probabilities=False, denormalize=True):        
+    def predict(self, X, batch_size = 256, return_probabilities=False, denormalize=True):        
         
         pred_list = []
         for X_batch in list(make_batch_det(X, batch_size)):        
