@@ -336,10 +336,10 @@ def preprocess_data(X_data,
 
 
 def load_dataset_for_streams(identifier, 
+                             max_total_samples,
                              random_seed=42, 
                              config=None,
-                             verbosity=0,
-                             max_total_samples):
+                             verbosity=0):
     
     if identifier == 'BIN:agr_a':
         feature_names = [
