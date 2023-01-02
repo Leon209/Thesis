@@ -118,26 +118,35 @@ def mergeDict(dict1, dict2):
     return newDict
 
 
-def normalize_data(X_data, technique='min-max', low=-1, high=1):
-    normalizer_list = []
+def normalize_data(X_data,normalizer_list, technique='min-max', low=-1, high=1):
     if isinstance(X_data, pd.DataFrame):
-        for column_name in X_data:
-            if technique == 'min-max':
-                scaler = MinMaxScaler(feature_range=(low, high))
-            elif technique == 'mean':
-                scaler = StandardScaler()
-            scaler.fit(X_data[column_name].values.reshape(-1, 1))
-            X_data[column_name] = scaler.transform(X_data[column_name].values.reshape(-1, 1)).ravel()
-            normalizer_list.append(scaler)
+        if not normalizer_list:
+            for column_name in X_data:
+                if technique == 'min-max':
+                    scaler = MinMaxScaler(feature_range=(low, high))
+                elif technique == 'mean':
+                    scaler = StandardScaler()
+                scaler.fit(X_data[column_name].values.reshape(-1, 1))
+                X_data[column_name] = scaler.transform(X_data[column_name].values.reshape(-1, 1)).ravel()
+                normalizer_list.append(scaler)
+        else:
+            i=0
+            for column_name in X_data:
+                X_data[column_name] = normalizer_list[i].transform(X_data[column_name].values.reshape(-1, 1)).ravel()
+                i = i+1
     else:
-        for i, column in enumerate(X_data.T):
-            if technique == 'min-max':
-                scaler = MinMaxScaler(feature_range=(low, high))
-            elif technique == 'mean':
-                scaler = StandardScaler()       
-            scaler.fit(column.reshape(-1, 1))
-            X_data[:,i] = scaler.transform(column.reshape(-1, 1)).ravel()
-            normalizer_list.append(scaler)
+        if not normalizer_list:
+            for i, column in enumerate(X_data.T):
+                if technique == 'min-max':
+                    scaler = MinMaxScaler(feature_range=(low, high))
+                elif technique == 'mean':
+                    scaler = StandardScaler()       
+                scaler.fit(column.reshape(-1, 1))
+                X_data[:,i] = scaler.transform(column.reshape(-1, 1)).ravel()
+                normalizer_list.append(scaler)
+        else:
+            for i, column in enumerate(X_data.T):     
+                X_data[:,i] = normalizer_list[i].transform(column.reshape(-1, 1)).ravel()
         
     return X_data, normalizer_list
 
@@ -268,6 +277,7 @@ def preprocess_data(X_data,
                     nominal_features,
                     ordinal_features,
                     config,
+                    normalizer_list,
                     random_seed=42,
                     verbosity=0):
 
@@ -299,7 +309,7 @@ def preprocess_data(X_data,
 
     
     if config['preprocessing']['normalization_technique'] is not None:
-        X_data, normalizer_list = normalize_data(X_data, technique=config['preprocessing']['normalization_technique'])
+        X_data, normalizer_list = normalize_data(X_data, normalizer_list, technique=config['preprocessing']['normalization_technique'])
     else:
         normalizer_list = None
     
@@ -328,7 +338,8 @@ def preprocess_data(X_data,
 def load_dataset_for_streams(identifier, 
                              random_seed=42, 
                              config=None,
-                             verbosity=0):
+                             verbosity=0,
+                             max_total_samples):
     
     if identifier == 'BIN:agr_a':
         feature_names = [
@@ -345,7 +356,8 @@ def load_dataset_for_streams(identifier,
                         ]
         
         data = pd.read_csv('./datasets_streaming/agr_a.csv', names=feature_names, index_col=False, delimiter=',', header=0)
-        print(data)
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
         
         features_select = [
                         'salary', #numeric
@@ -3211,7 +3223,8 @@ def get_preprocessed_dataset(identifier,
                                        ordinal_features,
                                        config,
                                        random_seed=random_seed,
-                                       verbosity=verbosity)      
+                                       verbosity=verbosity,
+                                       normalizer_list = normalizer_list)      
 
     
     return {
