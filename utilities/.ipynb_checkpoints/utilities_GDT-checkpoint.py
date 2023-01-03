@@ -381,7 +381,7 @@ def load_dataset_for_streams(identifier,
     if identifier == 'BIN:Electricity':
         feature_names = [
                         'date', #ignore.
-                        'day', #nominal
+                        'day', #nominal maybe use later
                         'period', #numeric
                         'nswprice', #ignore
                         'nswdemand', #numeric
@@ -399,7 +399,6 @@ def load_dataset_for_streams(identifier,
             y_data = y_data.head(max_total_samples)
         
         features_select = [
-                        #'day', #nominal
                         'period', #numeric
                         'nswdemand', #numeric
                         'vicprice',#numeric
@@ -409,7 +408,7 @@ def load_dataset_for_streams(identifier,
         
         X_data = X_data[features_select]
 
-        nominal_features = [] #nominal]
+        nominal_features = []
         ordinal_features = []
 
         y_data = pd.Series(OrdinalEncoder().fit_transform(y_data['class'].values.reshape(-1, 1)).flatten(), name='class')
