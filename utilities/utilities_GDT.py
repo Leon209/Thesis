@@ -378,7 +378,43 @@ def load_dataset_for_streams(identifier,
         
         return X_data, y_data, nominal_features, ordinal_features
         
+    if identifier == 'BIN:Electricity':
+        feature_names = [
+                        'date', #ignore.
+                        'day', #nominal
+                        'period', #numeric
+                        'nswprice', #ignore
+                        'nswdemand', #numeric
+                        'vicprice',#numeric
+                        'vicdemand',#numeric
+                        'transfer' #numeric
+                        ]
+        class_name = ['class']
         
+        X_data = pd.read_csv('./datasets_streaming/elec2_data.csv', names=feature_names, index_col=False, delimiter=' ', header=0)
+        y_data = pd.read_csv('./datasets_streaming/elec2_label.csv', names=class_name, index_col=False, delimiter=' ', header=0)
+        
+        if(len(X_data) > max_total_samples):
+            X_data = X_data.head(max_total_samples)
+            y_data = y_data.head(max_total_samples)
+        
+        features_select = [
+                        #'day', #nominal
+                        'period', #numeric
+                        'nswdemand', #numeric
+                        'vicprice',#numeric
+                        'vicdemand',#numeric
+                        'transfer' #numeric
+                        ]
+        
+        X_data = X_data[features_select]
+
+        nominal_features = [] #nominal]
+        ordinal_features = []
+
+        y_data = pd.Series(OrdinalEncoder().fit_transform(y_data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return X_data, y_data, nominal_features, ordinal_features
         
     
     
