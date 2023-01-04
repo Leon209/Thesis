@@ -291,14 +291,14 @@ def preprocess_data(X_data,
     if verbosity > 0:
         print('Original Data Shape (selected): ', X_data.shape)
 
-    transformer = ColumnTransformer(transformers=[('cat', OneHotEncoder(), nominal_features)], remainder='passthrough', sparse_threshold=0)
-    transformer.fit(X_data)
+    #transformer = ColumnTransformer(transformers=[('cat', OneHotEncoder(), nominal_features)], remainder='passthrough', sparse_threshold=0)
+    #transformer.fit(X_data)
 
-    X_data = transformer.transform(X_data)
-    X_data = pd.DataFrame(X_data, columns=transformer.get_feature_names())
+    #X_data = transformer.transform(X_data)
+    #X_data = pd.DataFrame(X_data, columns=transformer.get_feature_names())
 
-    for ordinal_feature in ordinal_features:
-        X_data[ordinal_feature] = OrdinalEncoder().fit_transform(X_data[ordinal_feature].values.reshape(-1, 1)).flatten()
+    #for ordinal_feature in ordinal_features:
+    #    X_data[ordinal_feature] = OrdinalEncoder().fit_transform(X_data[ordinal_feature].values.reshape(-1, 1)).flatten()
 
     X_data = X_data.astype(np.float64)
 
@@ -376,7 +376,7 @@ def load_dataset_for_streams(identifier,
         X_data = data.drop(['class'], axis = 1)
         y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
         
-        return X_data, y_data, nominal_features, ordinal_features
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
         
     if identifier == 'BIN:Electricity':
         feature_names = [
@@ -403,17 +403,18 @@ def load_dataset_for_streams(identifier,
                         'nswdemand', #numeric
                         'vicprice',#numeric
                         'vicdemand',#numeric
-                        'transfer' #numeric
+                        'transfer', #numeric
+                        'day'
                         ]
         
         X_data = X_data[features_select]
 
-        nominal_features = []
+        nominal_features = ['day']
         ordinal_features = []
 
         y_data = pd.Series(OrdinalEncoder().fit_transform(y_data['class'].values.reshape(-1, 1)).flatten(), name='class')
         
-        return X_data, y_data, nominal_features, ordinal_features
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
     
     
         
@@ -457,11 +458,21 @@ def load_dataset_for_streams(identifier,
 
         y_data = pd.Series(OrdinalEncoder().fit_transform(y_data['class'].values.reshape(-1, 1)).flatten(), name='class')
         
-        return X_data, y_data, nominal_features, ordinal_features
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
         
     
     
+def encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features):
+    transformer = ColumnTransformer(transformers=[('cat', OneHotEncoder(), nominal_features)], remainder='passthrough', sparse_threshold=0)
+    transformer.fit(X_data)
+    X_data = transformer.transform(X_data)
+    X_data = pd.DataFrame(X_data, columns=transformer.get_feature_names())
     
+    
+    for ordinal_feature in ordinal_features:
+        X_data[ordinal_feature] = OrdinalEncoder().fit_transform(X_data[ordinal_feature].values.reshape(-1, 1)).flatten()
+    
+    return X_data, y_data, nominal_features, ordinal_features
     
     
     
