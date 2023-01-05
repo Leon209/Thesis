@@ -346,9 +346,9 @@ def load_dataset_for_streams(identifier,
                         'salary', #numeric
                         'commission', #numeric
                         'age', #numeric
-                        'elevel', #ka
+                        'elevel', #ordinal
                         'car', #numeric
-                        'zipcode',
+                        'zipcode',#nominal
                         'hvalue',
                         'hyears',      
                         'loan', #numeric
@@ -362,16 +362,65 @@ def load_dataset_for_streams(identifier,
         features_select = [
                         'salary', #numeric
                         'commission', #numeric
-                        'age', #numeric
-                        'car', #numeric   
+                        'age',#numeric
+                        'elevel',
+                        'car', #numeric  
+                        'zipcode',
+                        'hvalue',
+                        'hyears',  
                         'loan', #numeric
-                        'class' #binary
+                        'class', #binary
                         ]
         
         data = data[features_select]
 
-        nominal_features = []
-        ordinal_features = []
+        nominal_features = ['zipcode',
+                           'car']
+        ordinal_features = ['elevel']
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    
+    if identifier == 'BIN:agr_g':
+        feature_names = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age', #numeric
+                        'elevel', #ordinal
+                        'car', #numeric
+                        'zipcode',#nominal
+                        'hvalue',
+                        'hyears',      
+                        'loan', #numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/agr_g.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+        
+        features_select = [
+                        'salary', #numeric
+                        'commission', #numeric
+                        'age',#numeric
+                        'elevel',
+                     #   'car', #numeric  
+                       # 'zipcode',
+                        'hvalue',
+                        'hyears',  
+                        'loan', #numeric
+                        'class', #binary
+                        ]
+        
+        data = data[features_select]
+
+        nominal_features = [#'zipcode',
+                           #'car'
+                            ]
+        ordinal_features = ['elevel']
 
         X_data = data.drop(['class'], axis = 1)
         y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
