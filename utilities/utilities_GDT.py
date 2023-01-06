@@ -474,6 +474,47 @@ def load_dataset_for_streams(identifier,
         return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
     
     
+    if identifier == 'BIN:airlines':
+        feature_names = [
+                        'airline', #nominal
+                        'flight', #numeric
+                        'airport_from', #nominal
+                        'airport_to', #nominal
+                        'day_of_week', #nominal
+                        'time',#numeric
+                        'length',#numeric
+                        'class'#binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/airlines.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+        
+        features_select = [
+                        'airline', #nominal
+                        'flight', #numeric
+                        'airport_from', #nominal
+                        'airport_to', #nominal
+                        'day_of_week', #nominal
+                        'time',#numeric
+                        'length',#numeric
+                        'class'#binary
+                        ]
+        
+        data = data[features_select]
+
+        nominal_features = ['airline',
+                           'airport_from',
+                           'airport_to',
+                           'day_of_week']
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    
     
     if identifier == 'BIN:agr_a':
         feature_names = [

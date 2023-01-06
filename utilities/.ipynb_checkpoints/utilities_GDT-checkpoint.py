@@ -398,7 +398,7 @@ def load_dataset_for_streams(identifier,
         stacked_data = np.column_stack((temp[0],temp[1]))
         data = pd.DataFrame(data = stacked_data, columns = feature_names)
         
-    if(len(data) > max_total_samples):
+        if(len(data) > max_total_samples):
             data = data.head(max_total_samples)
 
         nominal_features = []
@@ -409,7 +409,39 @@ def load_dataset_for_streams(identifier,
         
         return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
     
-        if identifier == 'BIN:rbf_m':
+    if identifier == 'BIN:hyperplane':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        stream = HyperplaneGenerator(mag_change=0.001)
+
+        temp = stream.next_sample(100000)
+        stacked_data = np.column_stack((temp[0],temp[1]))
+        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_m':
         feature_names = [
                         'att1', #numeric
                         'att2', #numeric
@@ -440,6 +472,48 @@ def load_dataset_for_streams(identifier,
         y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
         
         return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    
+    if identifier == 'BIN:airlines':
+        feature_names = [
+                        'airline', #nominal
+                        'flight', #numeric
+                        'airport_from', #nominal
+                        'airport_to', #nominal
+                        'day_of_week', #nominal
+                        'time',#numeric
+                        'length',#numeric
+                        'class'#binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/airlines.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+        
+        features_select = [
+                        'airline', #nominal
+                        'flight', #numeric
+                        'airport_from', #nominal
+                        'airport_to', #nominal
+                        'day_of_week', #nominal
+                        'time',#numeric
+                        'length',#numeric
+                        'class'#binary
+                        ]
+        
+        data = data[features_select]
+
+        nominal_features = ['airline',
+                           'airport_from',
+                           'airport_to',
+                           'day_of_week']
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
     
     
     if identifier == 'BIN:agr_a':
