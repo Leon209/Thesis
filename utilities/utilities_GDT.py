@@ -32,6 +32,10 @@ import logging
 import tensorflow as tf
 import tensorflow_addons as tfa
 
+from skmultiflow.data import SEAGenerator 
+from skmultiflow.data import HyperplaneGenerator
+from skmultiflow.data import RandomRBFGeneratorDrift
+
 tf.get_logger().setLevel('ERROR')
 tf.autograph.set_verbosity(3)
 #tf.get_logger().setLevel('WARNING')
@@ -340,6 +344,136 @@ def load_dataset_for_streams(identifier,
                              random_seed=42, 
                              config=None,
                              verbosity=0):
+    
+    if identifier == 'BIN:rbf_f':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        stream = RandomRBFGeneratorDrift(change_speed = 0.01)
+
+        temp = stream.next_sample(100000)
+        stacked_data = np.column_stack((temp[0],temp[1]))
+        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_m':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        stream = RandomRBFGeneratorDrift(change_speed = 0.0001)
+
+        temp = stream.next_sample(100000)
+        stacked_data = np.column_stack((temp[0],temp[1]))
+        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:hyperplane':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        stream = HyperplaneGenerator(mag_change=0.001)
+
+        temp = stream.next_sample(100000)
+        stacked_data = np.column_stack((temp[0],temp[1]))
+        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_m':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        stream = RandomRBFGeneratorDrift(change_speed = 0.0001)
+
+        temp = stream.next_sample(100000)
+        stacked_data = np.column_stack((temp[0],temp[1]))
+        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    
     
     if identifier == 'BIN:agr_a':
         feature_names = [
