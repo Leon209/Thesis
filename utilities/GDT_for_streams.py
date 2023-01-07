@@ -136,8 +136,7 @@ class GDT(tf.Module):
             initializer_leaf = 'GlorotUniform',
         
             normalize = None,
-        
-            
+                    
         
             random_seed = 42,
             verbosity = 1):   
@@ -297,7 +296,8 @@ class GDT(tf.Module):
     
     def backward(self, 
                  x: tf.Tensor,
-                 y: tf.Tensor):
+                 y: tf.Tensor,
+                 drift_flag: bool):
         
         
         with tf.GradientTape(persistent=True, watch_accessed_variables=False) as tape1:
@@ -321,6 +321,10 @@ class GDT(tf.Module):
                                 current_loss = tf.reduce_mean(self.loss(y, tfa.activations.sparsemax(predicted)))  
                     else:   
                         current_loss = tf.reduce_mean(self.loss(y, predicted))    
+        if(drift_flag):
+            self.optimizer_index.learning_rate = 0.3
+            self.optimizer_values.learning_rate = 0.3
+            self.optimizer_leaf.learning_rate = 0.3   
         
         grads1 = tape1.gradient(current_loss, self.leaf_classes_array)
         self.optimizer_leaf.apply_gradients(zip([grads1], [self.leaf_classes_array]))
@@ -348,8 +352,9 @@ class GDT(tf.Module):
             early_stopping_epsilon = 0,
             
             valid_data=None,
+                    
+            drift_flag=False
             ):
-         
         #Change to Partial fit method    
         if self.initialized == False:
             self.path_identifier_list = []
@@ -431,7 +436,6 @@ class GDT(tf.Module):
             
             #Change?
             if restart_number > 0:
-
                 tf.keras.backend.clear_session()
                 
                 self.optimizer_index = tf.keras.optimizers.get(self.optimizer)
@@ -460,7 +464,8 @@ class GDT(tf.Module):
             epochs_without_improvement = 0    
 
             batch_size = min(batch_size, int(np.ceil(X_train.shape[0]/2)))
-            #shuffle data
+            
+            
             #Hier Kann mein Code eingefügt werden
             for current_epoch in tqdm(range(epochs), desc='epochs', disable=disable):                
                 tf.random.set_seed(self.seed + current_epoch)
@@ -473,7 +478,7 @@ class GDT(tf.Module):
 
 
                 for index, (X_batch, y_batch) in enumerate(zip(make_batch_det(X_train_epoch, batch_size), make_batch_det(y_train_epoch, batch_size))):
-                    current_loss, preds_batch = backward_function(X_batch, y_batch)#self.backward(X_batch, y_batch)
+                    current_loss, preds_batch = backward_function(X_batch, y_batch, drift_flag)#self.backward(X_batch, y_batch)
                     loss_list.append(float(current_loss))
                     preds_list.append(preds_batch)
                     if self.verbosity > 2:
