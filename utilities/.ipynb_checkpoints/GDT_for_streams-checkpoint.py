@@ -322,9 +322,9 @@ class GDT(tf.Module):
                     else:   
                         current_loss = tf.reduce_mean(self.loss(y, predicted))    
         if(drift_flag):
-            self.optimizer_index.learning_rate = 0.3
-            self.optimizer_values.learning_rate = 0.3
-            self.optimizer_leaf.learning_rate = 0.3   
+            self.optimizer_index.learning_rate = 0.05
+            self.optimizer_values.learning_rate = 0.1
+            self.optimizer_leaf.learning_rate = 0.1   
         
         grads1 = tape1.gradient(current_loss, self.leaf_classes_array)
         self.optimizer_leaf.apply_gradients(zip([grads1], [self.leaf_classes_array]))
