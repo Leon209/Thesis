@@ -167,7 +167,7 @@ def split_train_test_valid(X_data, y_data, valid_frac=0.20, test_frac=0.20, seed
         print(X_valid.shape, y_valid.shape)
         print(X_test.shape, y_test.shape)    
     
-    return X_train, y_train, X_valid, y_valid, X_test, y_test
+    return X_train, y_train, X_valid, y_valid, X_test, y_test, X_train_with_valid, y_train_with_valid
 
 
 def rebalance_data(X_train, 
@@ -295,15 +295,6 @@ def preprocess_data(X_data,
     if verbosity > 0:
         print('Original Data Shape (selected): ', X_data.shape)
 
-    #transformer = ColumnTransformer(transformers=[('cat', OneHotEncoder(), nominal_features)], remainder='passthrough', sparse_threshold=0)
-    #transformer.fit(X_data)
-
-    #X_data = transformer.transform(X_data)
-    #X_data = pd.DataFrame(X_data, columns=transformer.get_feature_names())
-
-    #for ordinal_feature in ordinal_features:
-    #    X_data[ordinal_feature] = OrdinalEncoder().fit_transform(X_data[ordinal_feature].values.reshape(-1, 1)).flatten()
-
     X_data = X_data.astype(np.float64)
 
     if verbosity > 0:
@@ -322,19 +313,31 @@ def preprocess_data(X_data,
      X_valid, 
      y_valid, 
      X_test, 
-     y_test) = split_train_test_valid(X_data, 
+     y_test,
+     X_train_with_valid,
+     y_train_with_valid) = split_train_test_valid(X_data, 
                                       y_data, 
                                       seed=random_seed,
-                                      verbosity=verbosity)   
+                                      verbosity=verbosity)  
         
     if config['gdt']['objective'] == 'classification':
         X_train, y_train = rebalance_data(X_train, 
                                           y_train, 
                                           balance_ratio=config['preprocessing']['balance_threshold'],  
                                           strategy='SMOTE',
-                                          verbosity=verbosity)    
+                                          verbosity=verbosity)
+        
+        #
+        X_train_with_valid, y_train_with_valid = rebalance_data(X_train_with_valid, 
+                                          y_train_with_valid, 
+                                          balance_ratio=config['preprocessing']['balance_threshold'],  
+                                          strategy='SMOTE',
+                                          verbosity=verbosity)
 
-    return (X_train, y_train), (X_valid, y_valid), (X_test, y_test), normalizer_list
+    return (X_train, y_train), (X_valid, y_valid), (X_test, y_test), (X_train_with_valid, y_train_with_valid), normalizer_list
+
+
+
 
 
 
