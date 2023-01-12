@@ -1,0 +1,2 @@
+,Dataset Name,depth,lr index,lr values,lr leaf,optimizer,batch size,pretrain_size,pretrain_epochs
+0,electricity,8,0.05,0.01,0.005,adam,512,5000,30

@@ -429,39 +429,7 @@ def load_dataset_for_streams(identifier,
         
         stream = HyperplaneGenerator(mag_change=0.001)
 
-        temp = stream.next_sample(100000)
-        stacked_data = np.column_stack((temp[0],temp[1]))
-        data = pd.DataFrame(data = stacked_data, columns = feature_names)
-        
-        if(len(data) > max_total_samples):
-            data = data.head(max_total_samples)
-
-        nominal_features = []
-        ordinal_features = []
-
-        X_data = data.drop(['class'], axis = 1)
-        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
-        
-        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
-    
-    if identifier == 'BIN:rbf_m':
-        feature_names = [
-                        'att1', #numeric
-                        'att2', #numeric
-                        'att3', #numeric
-                        'att4', #numeric
-                        'att5', #numeric
-                        'att6', #numeric
-                        'att7', #numeric     
-                        'att8', #numeric
-                        'att9', #numeric
-                        'att10',#numeric
-                        'class' #binary
-                        ]
-        
-        stream = RandomRBFGeneratorDrift(change_speed = 0.0001)
-
-        temp = stream.next_sample(100000)
+        temp = stream.next_sample(500000)
         stacked_data = np.column_stack((temp[0],temp[1]))
         data = pd.DataFrame(data = stacked_data, columns = feature_names)
         
@@ -507,10 +475,9 @@ def load_dataset_for_streams(identifier,
         data = data[features_select]
 
         nominal_features = ['airline',
-                           'airport_from',
-                           'airport_to',
                            'day_of_week']
-        ordinal_features = []
+        ordinal_features = ['airport_from',
+                           'airport_to']
 
         X_data = data.drop(['class'], axis = 1)
         y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
@@ -664,7 +631,7 @@ def load_dataset_for_streams(identifier,
         
         return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
         
-    if identifier == 'BIN:Electricity':
+    if identifier == 'BIN:electricity':
         feature_names = [
                         'date', #ignore.
                         'day', #nominal maybe use later
@@ -5922,4 +5889,77 @@ def prepare_score_dict(config):
                 scores_dict[key] = {}    
                 
     return scores_dict
+
+def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classifier, CVFDT_classifier, config, timer):
+    #output performance
+#Global:(Average, Median)  Sliding:() 
+    results = pd.DataFrame(columns=['Metric','Operation','GDT','VFDT','CVFDT'])
+    results.loc[len(results)] =    ['f1','median',round(np.median(scores_GDT['f1']),4),round(np.median(scores_VFDT['f1']),4),round(np.median(scores_CVFDT['f1']),4)]
+    results.loc[len(results)] = ['f1','average',round(np.average(scores_GDT['f1']),4),round(np.average(scores_VFDT['f1']),4),round(np.average(scores_CVFDT['f1']),4)]
+    results.loc[len(results)] = ['f1','std',round(np.std(scores_GDT['f1']),4),round(np.std(scores_VFDT['f1']),4),round(np.std(scores_CVFDT['f1']),4)]
+
+    results.loc[len(results)] = ['accuracy','median',round(np.median(scores_GDT['acc']),4),round(np.median(scores_VFDT['acc']),4),round(np.median(scores_CVFDT['acc']),4)]
+    results.loc[len(results)] = ['accuracy','average',round(np.average(scores_GDT['acc']),4),round(np.average(scores_VFDT['acc']),4),round(np.average(scores_CVFDT['acc']),4)]
+    results.loc[len(results)] = ['accuracy','std',round(np.std(scores_GDT['acc']),4),round(np.std(scores_VFDT['acc']),4),round(np.std(scores_CVFDT['acc']),4)]
+
+
+    results.loc[len(results)] = ['training time','total',round(timer['training']['GDT'],4),round(timer['training']['VFDT'],4),round(timer['training']['CVFDT'],4)]
+    results.loc[len(results)] = ['prediction time','total',round(timer['prediction']['GDT'],4),round(timer['prediction']['VFDT'],4),round(timer['prediction']['CVFDT'],4)]
+
+    results.to_excel('results/'+dataset_name+'/scores_'+dataset_name+'.xlsx')
+    
+                     
+    #VFDT_Hyperparamas                 
+    VFDT_Hyperparamas = str(VFDT_classifier.get_info())
+    f = open('results/'+dataset_name+'/VFDT_Hyperparamas'+dataset_name+".txt", "w")
+    f.write(VFDT_Hyperparamas)
+    f.close()
+      
+    #CVFDT_Hyperparamas                 
+    CVFDT_Hyperparamas = str(CVFDT_classifier.get_info())
+    f = open('results/'+dataset_name+'/CVFDT_Hyperparamas'+dataset_name+".txt", "w")
+    f.write(CVFDT_Hyperparamas)
+    f.close()
+                     
+    #Parameters GDT
+    #Dataset Name, depth, 'lr index', 'lr values', 'lr leaf', 'optimizer', 'batch size', 'pretrain_size', 'pretrain_epochs'
+    GDT_Hyperparameters = pd.DataFrame(columns=['Dataset Name','depth','lr index', 'lr values', 'lr leaf', 'optimizer', 'batch size', 'pretrain_size', 'pretrain_epochs'])
+    GDT_Hyperparameters.loc[len(GDT_Hyperparameters)] = [dataset_name, config['gdt']['depth'],config['gdt']['learning_rate_index'],config['gdt']['learning_rate_values'] ,config['gdt']['learning_rate_leaf'],config['gdt']['optimizer'], config['gdt']['batch_size'], config['computation']['pretrain_size'], config['gdt']['pretrain_epochs']]
+    GDT_Hyperparameters.to_csv('results/'+dataset_name+'/GDT_Hyperparamas'+dataset_name+".csv")
+    
+    #Pairplot
+    X = np.arange(0, len(scores_GDT['acc']), 1)
+    with plt.style.context('default'):
+ 
+        # Assign variables to the y axis part of the curve
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 3))
+
+        fig.tight_layout()
+
+        # Plotting both the curves simultaneously
+        axes[0].plot(X, scores_GDT['acc'],  label='GDT Acc', linewidth=1)
+        axes[0].plot(X, scores_VFDT['acc'], label='VFDT Acc', linewidth=1)
+        axes[0].plot(X, scores_CVFDT['acc'],  label='CVFDT Acc', linewidth=1)
+
+        axes[1].plot(X, scores_GDT['f1'],  label='GDT_f1', linewidth=1)
+        axes[1].plot(X, scores_VFDT['f1'], label='VFDT_f1', linewidth=1)
+        axes[1].plot(X, scores_CVFDT['f1'], label='CVFDT_f1', linewidth=1)
+
+        axes[2].plot(X, scores_GDT['kappa'], label='GDT_f1', linewidth=1)
+        axes[2].plot(X, scores_VFDT['kappa'], label='VFDT_f1', linewidth=1)
+        axes[2].plot(X, scores_CVFDT['kappa'], label='CVFDT_f1', linewidth=1)
+
+        # Naming the x-axis, y-axis and the whole graph
+        axes[0].set_ylabel("Accuracy")
+        axes[1].set_ylabel("F1-score")
+        axes[2].set_ylabel("Kappa")
+        axes[1].set_title("Dataset: " + dataset_name)
+        plt.legend()
+    plt.tight_layout()
+    plt.savefig('results/'+dataset_name+'/lineplots_'+dataset_name+'.png', dpi = 300.0)
+    plt.show()
+
+
+
+
     

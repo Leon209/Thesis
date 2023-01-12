@@ -1,0 +1,7 @@
+HoeffdingTreeClassifier(binary_split=False, grace_period=200,
+                        leaf_prediction='nba', max_byte_size=33554432,
+                        memory_estimate_period=1000000, nb_threshold=0,
+                        no_preprune=False, nominal_attributes=None,
+                        remove_poor_atts=False, split_confidence=1e-07,
+                        split_criterion='info_gain', stop_mem_management=False,
+                        tie_threshold=0.05)
