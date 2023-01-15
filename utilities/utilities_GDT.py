@@ -363,11 +363,7 @@ def load_dataset_for_streams(identifier,
                         'class' #binary
                         ]
         
-        stream = RandomRBFGeneratorDrift(change_speed = 0.01)
-
-        temp = stream.next_sample(100000)
-        stacked_data = np.column_stack((temp[0],temp[1]))
-        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        data = pd.read_csv('./datasets_streaming/rbf_f.csv', names=feature_names, index_col=False, delimiter=',', header=0)
         
         if(len(data) > max_total_samples):
             data = data.head(max_total_samples)
@@ -395,11 +391,7 @@ def load_dataset_for_streams(identifier,
                         'class' #binary
                         ]
         
-        stream = RandomRBFGeneratorDrift(change_speed = 0.0001)
-
-        temp = stream.next_sample(100000)
-        stacked_data = np.column_stack((temp[0],temp[1]))
-        data = pd.DataFrame(data = stacked_data, columns = feature_names)
+        data = pd.read_csv('./datasets_streaming/rbf_m.csv', names=feature_names, index_col=False, delimiter=',', header=0)
         
         if(len(data) > max_total_samples):
             data = data.head(max_total_samples)

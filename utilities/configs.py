@@ -1,4 +1,4 @@
-get_config_for_dataset(dataset_name):
+def get_config_for_dataset(dataset_name):
     if(dataset_name == 'agr_g'):
         config = {
             'gdt': {
@@ -213,7 +213,7 @@ get_config_for_dataset(dataset_name):
         return config
     
     
-     if(dataset_name == 'electricity'):
+    if(dataset_name == 'electricity'):
         config = {
             'gdt': {
                 'depth': 11,
@@ -445,7 +445,7 @@ get_config_for_dataset(dataset_name):
 
                 'optimizer': 'adam', 
 
-                'batch_size': 128,#120
+                'batch_size': 256,#120
                 'epochs': 1,
 
                 'restarts': 0,#
@@ -459,7 +459,7 @@ get_config_for_dataset(dataset_name):
             },
 
             'preprocessing': {
-                'balance_threshold': 0.5,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
+                'balance_threshold': 0,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
                 'normalization_technique': 'mean', #'min-max'
             },
 
@@ -488,8 +488,8 @@ get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 250000,
-                'chunk_size': 10000,#default 200
-                'pretrain_size': 1000,
+                'chunk_size': 2500,#default 200
+                'pretrain_size': 2500,
             },
 
             'benchmarks': {       
@@ -498,7 +498,7 @@ get_config_for_dataset(dataset_name):
         return config
     
     
-        if(dataset_name == 'rbf_m'):
+    if(dataset_name == 'rbf_m'):
         config = {
             'gdt': {
                 'depth': 11,
@@ -516,7 +516,7 @@ get_config_for_dataset(dataset_name):
 
                 'optimizer': 'adam', 
 
-                'batch_size': 128,#120
+                'batch_size': 256,#120
                 'epochs': 1,
 
                 'restarts': 0,#
@@ -530,7 +530,7 @@ get_config_for_dataset(dataset_name):
             },
 
             'preprocessing': {
-                'balance_threshold': 0.5,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
+                'balance_threshold': 0,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
                 'normalization_technique': 'mean', #'min-max'
             },
 
@@ -559,8 +559,8 @@ get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 250000,
-                'chunk_size': 10000,#default 200
-                'pretrain_size': 1000,
+                'chunk_size': 2500,#default 200
+                'pretrain_size': 2500,
             },
 
             'benchmarks': {       
@@ -570,7 +570,7 @@ get_config_for_dataset(dataset_name):
     
     
     
-        if(dataset_name == 'sea_a'):
+    if(dataset_name == 'sea_a'):
         config = {
             'gdt': {
                 'depth': 11,
