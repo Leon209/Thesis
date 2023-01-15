@@ -5781,9 +5781,9 @@ def get_benchmark_dict(config, eval_identifier):
 
 def prepare_training_for_streams(identifier, config: dict):
     
-    tf.random.set_seed(config['computation']['random_seed'])
-    np.random.seed(config['computation']['random_seed'])
-    random.seed(config['computation']['random_seed'])  
+    #tf.random.set_seed(config['computation']['random_seed'])
+    #np.random.seed(config['computation']['random_seed'])
+    #random.seed(config['computation']['random_seed'])  
     
     config_test = deepcopy(config)
     #config_test['gdt']['epochs'] = 100

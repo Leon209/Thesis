@@ -1,4 +1,4 @@
-def get_config_for_dataset(dataset_name):
+def get_config_for_dataset(dataset_name)-> {}:
     if(dataset_name == 'agr_g'):
         config = {
             'gdt': {
@@ -8,7 +8,7 @@ def get_config_for_dataset(dataset_name):
                 'learning_rate_values': 0.01,
                 'learning_rate_leaf': 0.005,
 
-                'dropout': 0, #0.2 oder 0.5
+                'dropout': 0.2, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
@@ -60,7 +60,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 1000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
@@ -130,7 +130,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 1000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
@@ -160,7 +160,7 @@ def get_config_for_dataset(dataset_name):
 
                 'optimizer': 'adam', 
 
-                'batch_size': 512,#120
+                'batch_size': 256,#120
                 'epochs': 1,
 
                 'restarts': 0,#
@@ -203,7 +203,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 5000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
@@ -346,7 +346,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 5000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
@@ -365,7 +365,7 @@ def get_config_for_dataset(dataset_name):
                 'learning_rate_values': 0.01,
                 'learning_rate_leaf': 0.005,
 
-                'dropout': 0, #0.2 oder 0.5
+                'dropout': 0.2, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
@@ -384,7 +384,7 @@ def get_config_for_dataset(dataset_name):
                 'early_stopping_type': 'loss', #'loss', 'metric'
                 'early_stopping_epsilon': 0.0,
 
-                'pretrain_epochs': 30,
+                'pretrain_epochs': 20,
             },
 
             'preprocessing': {
@@ -631,7 +631,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 2000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
@@ -702,7 +702,7 @@ def get_config_for_dataset(dataset_name):
                 'eval_metric_reg': 'r2', #r2 mae        
 
                 'max_total_samples': 1000000,
-                'chunk_size': 2000,#default 200
+                'chunk_size': 2500,#default 200
                 'pretrain_size': 10000,
             },
 
