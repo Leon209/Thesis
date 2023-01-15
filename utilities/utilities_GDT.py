@@ -5937,17 +5937,17 @@ def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classi
         fig.tight_layout()
 
         # Plotting both the curves simultaneously
-        axes[0].plot(X, scores_GDT['acc'],  label='GDT Acc', linewidth=1)
-        axes[0].plot(X, scores_VFDT['acc'], label='VFDT Acc', linewidth=1)
-        axes[0].plot(X, scores_CVFDT['acc'],  label='CVFDT Acc', linewidth=1)
+        axes[0].plot(X, scores_GDT['acc'],  label='GDT Acc', linewidth=0.3)
+        axes[0].plot(X, scores_VFDT['acc'], label='VFDT Acc', linewidth=0.3)
+        axes[0].plot(X, scores_CVFDT['acc'],  label='CVFDT Acc', linewidth=0.3)
 
-        axes[1].plot(X, scores_GDT['f1'],  label='GDT_f1', linewidth=1)
-        axes[1].plot(X, scores_VFDT['f1'], label='VFDT_f1', linewidth=1)
-        axes[1].plot(X, scores_CVFDT['f1'], label='CVFDT_f1', linewidth=1)
+        axes[1].plot(X, scores_GDT['f1'],  label='GDT_f1', linewidth=0.3)
+        axes[1].plot(X, scores_VFDT['f1'], label='VFDT_f1', linewidth=0.3)
+        axes[1].plot(X, scores_CVFDT['f1'], label='CVFDT_f1', linewidth=0.3)
 
-        axes[2].plot(X, scores_GDT['kappa'], label='GDT_f1', linewidth=1)
-        axes[2].plot(X, scores_VFDT['kappa'], label='VFDT_f1', linewidth=1)
-        axes[2].plot(X, scores_CVFDT['kappa'], label='CVFDT_f1', linewidth=1)
+        axes[2].plot(X, scores_GDT['kappa'], label='GDT_f1', linewidth=0.3)
+        axes[2].plot(X, scores_VFDT['kappa'], label='VFDT_f1', linewidth=0.3)
+        axes[2].plot(X, scores_CVFDT['kappa'], label='CVFDT_f1', linewidth=0.3)
 
         # Naming the x-axis, y-axis and the whole graph
         axes[0].set_ylabel("Accuracy")
