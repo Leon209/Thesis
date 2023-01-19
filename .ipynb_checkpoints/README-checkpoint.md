@@ -1,4 +1,4 @@
-This code is used to generate the results for the paper "Learning Axis-Aligned Decision Trees with Gradient Descent".
+# GDTs for Stream Learning
 
 We provide two files, one jupyter notebook file with the config in the top cell and one python script where the config is loaded from "config.json". The python script only covers the main results, while the notebook shows additional results.
 
