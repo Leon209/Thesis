@@ -50,7 +50,7 @@ import time
 import random
 
 from utilities.utilities_GDT import *
-from utilities.GDT import *
+from utilities.GDT_for_streams import *
 
 
 from joblib import Parallel, delayed
@@ -203,7 +203,7 @@ class GDT(tf.Module):
         self.optimizer_leaf.learning_rate = self.learning_rate_leaf     
             
             
-        self.plotlosses = PlotLosses()    
+        #self.plotlosses = PlotLosses()    
       
     
     
@@ -518,11 +518,11 @@ class GDT(tf.Module):
                         msg = "Epoch: {:02d} | Valid Loss: {:.5f} |"
                         print(msg.format(current_epoch, current_loss_epoch_valid))                   
 
-                if self.verbosity == 1:  
+                #if self.verbosity == 1:  
 
 
-                    self.plotlosses.update(loss_dict)
-                    self.plotlosses.send()            
+                    #self.plotlosses.update(loss_dict)
+                    #self.plotlosses.send()            
 
                 if early_stopping_type == 'metric' or restart_type == 'metric': 
 

@@ -54,7 +54,7 @@ import time
 import random
 
 from utilities.utilities_GDT import *
-from utilities.GDT import *
+from utilities.GDT_for_streams import *
 
 from joblib import Parallel, delayed
 
@@ -5889,11 +5889,25 @@ def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classi
     results.loc[len(results)] =    ['f1','median',round(np.median(scores_GDT['f1']),4),round(np.median(scores_VFDT['f1']),4),round(np.median(scores_CVFDT['f1']),4)]
     results.loc[len(results)] = ['f1','average',round(np.average(scores_GDT['f1']),4),round(np.average(scores_VFDT['f1']),4),round(np.average(scores_CVFDT['f1']),4)]
     results.loc[len(results)] = ['f1','std',round(np.std(scores_GDT['f1']),4),round(np.std(scores_VFDT['f1']),4),round(np.std(scores_CVFDT['f1']),4)]
+    results.loc[len(results)] = ['f1','min',round(np.min(scores_GDT['f1']),4),round(np.min(scores_VFDT['f1']),4),round(np.min(scores_CVFDT['f1']),4)]
+    results.loc[len(results)] = ['f1','max',round(np.max(scores_GDT['f1']),4),round(np.max(scores_VFDT['f1']),4),round(np.max(scores_CVFDT['f1']),4)]
+    results.loc[len(results)] = ['-','-','-','-','-']
 
     results.loc[len(results)] = ['accuracy','median',round(np.median(scores_GDT['acc']),4),round(np.median(scores_VFDT['acc']),4),round(np.median(scores_CVFDT['acc']),4)]
     results.loc[len(results)] = ['accuracy','average',round(np.average(scores_GDT['acc']),4),round(np.average(scores_VFDT['acc']),4),round(np.average(scores_CVFDT['acc']),4)]
     results.loc[len(results)] = ['accuracy','std',round(np.std(scores_GDT['acc']),4),round(np.std(scores_VFDT['acc']),4),round(np.std(scores_CVFDT['acc']),4)]
-
+    results.loc[len(results)] = ['accuracy','min',round(np.min(scores_GDT['acc']),4),round(np.min(scores_VFDT['acc']),4),round(np.min(scores_CVFDT['acc']),4)]
+    results.loc[len(results)] = ['accuracy','max',round(np.max(scores_GDT['acc']),4),round(np.max(scores_VFDT['acc']),4),round(np.max(scores_CVFDT['acc']),4)]
+    results.loc[len(results)] = ['-','-','-','-','-']
+    
+    
+    results.loc[len(results)] = ['kappa','median',round(np.median(scores_GDT['kappa']),4),round(np.median(scores_VFDT['kappa']),4),round(np.median(scores_CVFDT['kappa']),4)]
+    results.loc[len(results)] = ['kappa','average',round(np.average(scores_GDT['kappa']),4),round(np.average(scores_VFDT['kappa']),4),round(np.average(scores_CVFDT['kappa']),4)]
+    results.loc[len(results)] = ['kappa','std',round(np.std(scores_GDT['kappa']),4),round(np.std(scores_VFDT['kappa']),4),round(np.std(scores_CVFDT['kappa']),4)]
+    results.loc[len(results)] = ['kappa','min',round(np.min(scores_GDT['kappa']),4),round(np.min(scores_VFDT['kappa']),4),round(np.min(scores_CVFDT['kappa']),4)]
+    results.loc[len(results)] = ['kappa','max',round(np.max(scores_GDT['kappa']),4),round(np.max(scores_VFDT['kappa']),4),round(np.max(scores_CVFDT['kappa']),4)]
+    results.loc[len(results)] = ['-','-','-','-','-']
+    
 
     results.loc[len(results)] = ['training time','total',round(timer['training']['GDT'],4),round(timer['training']['VFDT'],4),round(timer['training']['CVFDT'],4)]
     results.loc[len(results)] = ['prediction time','total',round(timer['prediction']['GDT'],4),round(timer['prediction']['VFDT'],4),round(timer['prediction']['CVFDT'],4)]
@@ -5950,6 +5964,54 @@ def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classi
     plt.tight_layout()
     plt.savefig('results/'+dataset_name+'/lineplots_'+dataset_name+'.png', dpi = 300.0)
     plt.show()
+    
+    with plt.style.context('default'):
+        
+        plt.plot(X, scores_GDT['f1'],  label='GDT_f1', linewidth=0.3) #465, 630
+        plt.plot(X, scores_VFDT['f1'], label='VFDT_f1', linewidth=0.3)
+        plt.plot(X, scores_CVFDT['f1'], label='CVFDT_f1', linewidth=0.3)
+
+        # Naming the x-axis, y-axis and the whole graph
+        plt.ylabel("F1-score")
+        plt.title("Dataset: " + dataset_name)
+        plt.legend()
+
+    plt.subplots(figsize=(4, 3))
+    plt.tight_layout()
+    plt.savefig('results/'+dataset_name+'/f1_plot_'+dataset_name+'.png', dpi = 300.0)
+    
+    
+    plt.clf()     
+    with plt.style.context('default'):
+        
+        plt.plot(X, scores_GDT['acc'],  label='GDT_f1', linewidth=0.3) #465, 630
+        plt.plot(X, scores_VFDT['acc'], label='VFDT_f1', linewidth=0.3)
+        plt.plot(X, scores_CVFDT['acc'], label='CVFDT_f1', linewidth=0.3)
+
+        # Naming the x-axis, y-axis and the whole graph
+        plt.ylabel("Accuracy")
+        plt.title("Dataset: " + dataset_name)
+        plt.legend()
+
+    plt.subplots(figsize=(4, 3))
+    plt.tight_layout()
+    plt.savefig('results/'+dataset_name+'/acc_plot_'+dataset_name+'.png', dpi = 300.0)
+    
+    plt.clf()  
+    with plt.style.context('default'):
+        
+        plt.plot(X, scores_GDT['kappa'],  label='GDT_f1', linewidth=0.3) #465, 630
+        plt.plot(X, scores_VFDT['kappa'], label='VFDT_f1', linewidth=0.3)
+        plt.plot(X, scores_CVFDT['kappa'], label='CVFDT_f1', linewidth=0.3)
+
+        # Naming the x-axis, y-axis and the whole graph
+        plt.ylabel("Kappa")
+        plt.title("Dataset: " + dataset_name)
+        plt.legend()
+
+    plt.subplots(figsize=(4, 3))
+    plt.tight_layout()
+    plt.savefig('results/'+dataset_name+'/kappa_plot_'+dataset_name+'.png', dpi = 300.0)
 
 
 
