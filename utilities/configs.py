@@ -503,11 +503,11 @@ def get_config_for_dataset(dataset_name)-> {}:
             'gdt': {
                 'depth': 11,
 
-                'learning_rate_index': 0.05,
-                'learning_rate_values': 0.01,
-                'learning_rate_leaf': 0.005,
+                'learning_rate_index': 0.02,
+                'learning_rate_values': 0.003,
+                'learning_rate_leaf': 0.002,
 
-                'dropout': 0.2, #0.2 oder 0.5
+                'dropout': 0.5, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
@@ -516,7 +516,7 @@ def get_config_for_dataset(dataset_name)-> {}:
 
                 'optimizer': 'adam', 
 
-                'batch_size': 256,#120
+                'batch_size': 256,
                 'epochs': 1,
 
                 'restarts': 0,#
