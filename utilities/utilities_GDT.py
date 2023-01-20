@@ -5967,6 +5967,7 @@ def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classi
 
     with plt.style.context('default'):
         #fig, ax = plt.subplots(figsize=(4, 3))
+        plt.subplots(figsize=(4, 3))
         
         plt.plot(X, scores_GDT['f1'],  label='GDT_f1', linewidth=0.4) #465, 630
         plt.plot(X, scores_VFDT['f1'], label='VFDT_f1', linewidth=0.4)
