@@ -4,6 +4,6 @@ HoeffdingAdaptiveTreeClassifier(binary_split=False, bootstrap_sampling=True,
                                 memory_estimate_period=1000000, nb_threshold=0,
                                 no_preprune=False, nominal_attributes=None,
                                 random_state=None, remove_poor_atts=False,
-                                split_confidence=1e-07,
+                                split_confidence=0.0001,
                                 split_criterion='info_gain',
                                 stop_mem_management=False, tie_threshold=0.05)

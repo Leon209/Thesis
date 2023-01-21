@@ -375,6 +375,145 @@ def load_dataset_for_streams(identifier,
         y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
         
         return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    if identifier == 'BIN:rbf_1':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/rbf_1.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_2':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/rbf_2.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_3':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/rbf_3.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_4':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/rbf_4.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
+    
+    if identifier == 'BIN:rbf_5':
+        feature_names = [
+                        'att1', #numeric
+                        'att2', #numeric
+                        'att3', #numeric
+                        'att4', #numeric
+                        'att5', #numeric
+                        'att6', #numeric
+                        'att7', #numeric     
+                        'att8', #numeric
+                        'att9', #numeric
+                        'att10',#numeric
+                        'class' #binary
+                        ]
+        
+        data = pd.read_csv('./datasets_streaming/rbf_5.csv', names=feature_names, index_col=False, delimiter=',', header=0)
+        
+        if(len(data) > max_total_samples):
+            data = data.head(max_total_samples)
+
+        nominal_features = []
+        ordinal_features = []
+
+        X_data = data.drop(['class'], axis = 1)
+        y_data = pd.Series(OrdinalEncoder().fit_transform(data['class'].values.reshape(-1, 1)).flatten(), name='class')
+        
+        return encode_ordinal_and_nominal_features(X_data, y_data, nominal_features, ordinal_features)
     
     if identifier == 'BIN:rbf_m':
         feature_names = [

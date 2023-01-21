@@ -470,10 +470,12 @@ class GDT(tf.Module):
             
             #Hier Kann mein Code eingefügt werden
             for current_epoch in tqdm(range(epochs), desc='epochs', disable=disable):                
-                tf.random.set_seed(self.seed + current_epoch)
-                X_train_epoch = tf.random.shuffle(X_train, seed=self.seed + current_epoch)
-                tf.random.set_seed(self.seed + current_epoch)
-                y_train_epoch = tf.random.shuffle(y_train, seed=self.seed + current_epoch)      
+                #tf.random.set_seed(self.seed + current_epoch)
+                #X_train_epoch = tf.random.shuffle(X_train, seed=self.seed + current_epoch)
+                X_train_epoch = X_train
+                #tf.random.set_seed(self.seed + current_epoch)
+                #y_train_epoch = tf.random.shuffle(y_train, seed=self.seed + current_epoch) 
+                y_train_epoch = y_train
 
                 loss_list = []   
                 preds_list = []

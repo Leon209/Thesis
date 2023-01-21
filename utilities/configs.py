@@ -433,10 +433,10 @@ def get_config_for_dataset(dataset_name)-> {}:
                 'depth': 11,
 
                 'learning_rate_index': 0.05,
-                'learning_rate_values': 0.01,
-                'learning_rate_leaf': 0.005,
+                'learning_rate_values': 0.03,
+                'learning_rate_leaf': 0.008,
 
-                'dropout': 0.2, #0.2 oder 0.5
+                'dropout': 0.5, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
@@ -489,7 +489,7 @@ def get_config_for_dataset(dataset_name)-> {}:
 
                 'max_total_samples': 250000,
                 'chunk_size': 2500,#default 200
-                'pretrain_size': 2500,
+                'pretrain_size': 5000,
             },
 
             'benchmarks': {       
