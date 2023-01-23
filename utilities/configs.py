@@ -8,7 +8,7 @@ def get_config_for_dataset(dataset_name)-> {}:
                 'learning_rate_values': 0.01,
                 'learning_rate_leaf': 0.005,
 
-                'dropout': 0.2, #0.2 oder 0.5
+                'dropout': 0.5, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
@@ -31,7 +31,7 @@ def get_config_for_dataset(dataset_name)-> {}:
             },
 
             'preprocessing': {
-                'balance_threshold': 0.5,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
+                'balance_threshold': 0.95,#.25, #if minclass fraction less than threshold/num_classes | #0=no rebalance, 1=rebalance all
                 'normalization_technique': 'mean', #'min-max'
             },
 
@@ -433,10 +433,10 @@ def get_config_for_dataset(dataset_name)-> {}:
                 'depth': 11,
 
                 'learning_rate_index': 0.05,
-                'learning_rate_values': 0.03,
-                'learning_rate_leaf': 0.008,
+                'learning_rate_values': 0.01,
+                'learning_rate_leaf': 0.005,
 
-                'dropout': 0.5, #0.2 oder 0.5
+                'dropout': 0.2, #0.2 oder 0.5
 
 
                 'initializer_values': 'GlorotUniform', 
