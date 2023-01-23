@@ -14,6 +14,7 @@ from collections import Counter
 import os
 from tqdm.notebook import tqdm
 from matplotlib import pyplot as plt
+import math
 
 from IPython.display import Image
 from IPython.display import display, clear_output
@@ -6239,6 +6240,14 @@ def save_scores(dataset_name, scores_GDT, scores_VFDT, scores_CVFDT, VFDT_classi
         plt.savefig('results/'+dataset_name+'/kappa_plot_'+dataset_name+'.png', dpi = 300.0)
 
 
+def split_df_chunks(data_df,chunk_size):
+    total_length     = len(data_df)
+    normal_chunk_num = math.floor(total_length/chunk_size)
+    chunks = []
+    for i in range(normal_chunk_num):
+        chunk = data_df[(i*chunk_size):((i+1)*chunk_size)]
+        chunks.append(chunk)
 
+    return chunks
 
     

@@ -333,7 +333,6 @@ class GDT(tf.Module):
         grads3 = tape3.gradient(current_loss, self.split_index_array)
         self.optimizer_index.apply_gradients(zip([grads3], [self.split_index_array]))
         
-        print(str(self.optimizer_index.learning_rate))
 
         return current_loss, predicted
         
